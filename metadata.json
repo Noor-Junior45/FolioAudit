@@ -1,0 +1,8 @@
+{
+  "name": "FolioAudit",
+  "description": "Mutual fund and ETF portfolio overlap analysis tool for Indian equity schemes and index ETFs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
