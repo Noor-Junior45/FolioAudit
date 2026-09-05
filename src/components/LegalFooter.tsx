@@ -1,7 +1,15 @@
 import React from 'react';
 import { ShieldCheck, Info } from 'lucide-react';
 
-export const LegalFooter: React.FC = () => {
+interface LegalFooterProps {
+  onOpenConsent?: () => void;
+  adsConsent?: boolean | null;
+}
+
+export const LegalFooter: React.FC<LegalFooterProps> = ({
+  onOpenConsent,
+  adsConsent,
+}) => {
   return (
     <footer
       id="legal-compliance-footer"
@@ -31,9 +39,26 @@ export const LegalFooter: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 text-[11px] font-mono text-emerald-800/70 border-t border-emerald-200/40">
-          <span>SEBI Circular Compliance: SEBI/HO/IMD/DF2/CIR/P/2018/19</span>
-          <span>Portfolio Snapshot as of statutory month-end disclosures</span>
+        <div className="pt-3.5 border-t border-emerald-200/50 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3.5 text-[11px] leading-relaxed text-emerald-900/75">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 font-mono text-[10.5px] sm:text-[11px]">
+            <span>SEBI Circular Compliance: SEBI/HO/IMD/DF2/CIR/P/2018/19</span>
+            <span className="hidden sm:inline text-emerald-300">•</span>
+            <span>Portfolio Snapshot as of statutory month-end disclosures</span>
+          </div>
+
+          {onOpenConsent && (
+            <div className="w-full sm:w-auto flex items-center justify-start lg:justify-end">
+              <button
+                id="footer-open-consent-btn"
+                type="button"
+                onClick={onOpenConsent}
+                className="text-emerald-900 hover:text-emerald-950 underline underline-offset-4 decoration-emerald-500/70 hover:decoration-emerald-700 font-sans font-medium text-xs transition-colors cursor-pointer bg-transparent border-0 p-0"
+                title="Manage personalized ads and cookie preferences"
+              >
+                Consent Preferences
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </footer>

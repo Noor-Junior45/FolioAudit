@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { Fund } from './types';
 import { MOCK_FUNDS } from './data/mockFunds';
@@ -8,6 +8,17 @@ import { CircularOverlapChart } from './components/CircularOverlapChart';
 import { PairwiseMatrix } from './components/PairwiseMatrix';
 import { KnowledgeAndGuide } from './components/KnowledgeAndGuide';
 import { LegalFooter } from './components/LegalFooter';
+import { ConsentModal } from './components/ConsentModal';
+import {
+  getSavedAdsConsent,
+  applyGtagConsent,
+  initDefaultConsent,
+} from './utils/consent';
+import {
+  trackFundSelect,
+  trackFundComparison,
+  trackSectionView,
+} from './utils/analytics';
 
 const FUND_COLORS = [
   '#00A896', // Fund 1: Teal (Top)
@@ -25,7 +36,37 @@ export default function App() {
     MOCK_FUNDS[3]  // Fund 4: Quant Active Fund
   ]);
 
+  // Consent modal state: NOT shown until user presses consent button in footer
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+  const [adsConsent, setAdsConsent] = useState<boolean | null>(() => getSavedAdsConsent());
+
+  useEffect(() => {
+    // Initialize default consent: Google Analytics is active by default
+    initDefaultConsent();
+  }, []);
+
+  // Track active fund comparisons in Google Analytics whenever selected funds change
+  useEffect(() => {
+    const validFundNames = selectedFunds.filter((f): f is Fund => f !== null).map((f) => f.name);
+    if (validFundNames.length >= 2) {
+      trackFundComparison(validFundNames);
+    }
+  }, [selectedFunds]);
+
+  const handleAcceptAds = () => {
+    applyGtagConsent(true);
+    setAdsConsent(true);
+    setIsConsentModalOpen(false);
+  };
+
+  const handleRejectAds = () => {
+    applyGtagConsent(false);
+    setAdsConsent(false);
+    setIsConsentModalOpen(false);
+  };
+
   const handleSelectFund = (index: number, fund: Fund) => {
+    trackFundSelect(fund.name, fund.category, index);
     const updated = [...selectedFunds];
     updated[index] = fund;
     setSelectedFunds(updated);
@@ -117,9 +158,21 @@ export default function App() {
 
         {/* 5. Scope Note & Legal Compliance Footer */}
         <section id="section-legal-compliance" className="w-full mt-auto pt-10">
-          <LegalFooter />
+          <LegalFooter
+            onOpenConsent={() => setIsConsentModalOpen(true)}
+            adsConsent={adsConsent}
+          />
         </section>
       </main>
+
+      {/* Pop Card Consent Modal (Shown ONLY when user clicks Consent Preferences button in footer) */}
+      <ConsentModal
+        isOpen={isConsentModalOpen}
+        onClose={() => setIsConsentModalOpen(false)}
+        onAcceptAds={handleAcceptAds}
+        onRejectAds={handleRejectAds}
+        currentAdsConsent={adsConsent}
+      />
     </div>
   );
 }

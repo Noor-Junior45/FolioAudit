@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Fund } from '../types';
 import { calculatePairwiseOverlap } from '../utils/overlapCalculator';
 import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { trackInspectOverlap } from '../utils/analytics';
 
 interface PairwiseMatrixProps {
   funds: (Fund | null)[];
@@ -14,11 +15,17 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
 }) => {
   const [expandedPairKeys, setExpandedPairKeys] = useState<Record<string, boolean>>({});
 
-  const togglePairExpanded = (key: string) => {
-    setExpandedPairKeys((prev) => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+  const togglePairExpanded = (key: string, fundA?: Fund, fundB?: Fund, overlapPct?: number) => {
+    setExpandedPairKeys((prev) => {
+      const willBeExpanded = !prev[key];
+      if (willBeExpanded && fundA && fundB && overlapPct !== undefined) {
+        trackInspectOverlap(fundA.name, fundB.name, overlapPct);
+      }
+      return {
+        ...prev,
+        [key]: willBeExpanded
+      };
+    });
   };
 
   // Group pairs according to user requirement:
@@ -222,7 +229,7 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
                     <div className="pt-2 border-t border-neutral-200/50">
                       <button
                         type="button"
-                        onClick={() => togglePairExpanded(key)}
+                        onClick={() => togglePairExpanded(key, fundA, fundB, percentage)}
                         className="w-full flex items-center justify-between text-xs text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
                       >
                         <span className="flex items-center gap-1 text-[11px]">

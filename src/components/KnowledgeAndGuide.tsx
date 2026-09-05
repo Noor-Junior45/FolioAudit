@@ -186,8 +186,22 @@ export const KnowledgeAndGuide: React.FC = () => {
               <p className="text-xs text-neutral-700 leading-relaxed">
                 We use the standard institutional minimum-weight formula:
               </p>
-              <div className="p-2.5 rounded-xl bg-neutral-900 text-neutral-100 font-mono text-[11px] text-center leading-snug">
-                Overlap(A, B) = ∑ min(Weight_A(i), Weight_B(i))
+              <div className="py-3.5 px-4 my-3 rounded-xl bg-white font-mono text-xs sm:text-[12.5px] text-center leading-relaxed tracking-wide shadow-2xs">
+                <span className="text-indigo-600 font-bold">Overlap</span>
+                <span className="text-neutral-400">(</span>
+                <span className="text-teal-600 font-bold">A</span>
+                <span className="text-neutral-400">, </span>
+                <span className="text-amber-600 font-bold">B</span>
+                <span className="text-neutral-400">)</span>
+                <span className="text-neutral-400 font-bold mx-2">=</span>
+                <span className="text-purple-600 font-bold text-sm sm:text-base">∑</span>
+                <span className="text-rose-600 font-bold ml-1.5">min</span>
+                <span className="text-neutral-400">(</span>
+                <span className="text-teal-600 font-semibold">Weight_A</span>
+                <span className="text-neutral-400">(i), </span>
+                <span className="text-amber-600 font-semibold">Weight_B</span>
+                <span className="text-neutral-400">(i)</span>
+                <span className="text-neutral-400">)</span>
               </div>
               <p className="text-xs text-neutral-600 leading-relaxed">
                 If Fund A holds 8% in Stock X and Fund B holds 5%, the mutual overlap contribution for Stock X is exactly <strong>5%</strong>.

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Fund } from '../types';
 import { MOCK_FUNDS } from '../data/mockFunds';
+import { trackFundSelect, trackFundSearch } from '../utils/analytics';
 
 interface FundComboboxProps {
   selectedFund: Fund | null;
@@ -71,10 +72,13 @@ export const FundCombobox: React.FC<FundComboboxProps> = ({
     setIsOpen(true);
     if (val.trim() === '' && selectedFund) {
       onClear();
+    } else if (val.trim().length >= 2) {
+      trackFundSearch(val, filteredFunds.length);
     }
   };
 
   const handleSelect = (fund: Fund) => {
+    trackFundSelect(fund.name, fund.category, 0);
     onSelect(fund);
     setInputValue(fund.name);
     setIsEditing(false);

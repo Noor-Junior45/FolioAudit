@@ -3,12 +3,120 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FolioAudit</title>
-    <meta name="description" content="Mutual fund and ETF portfolio overlap analysis tool for Indian equity schemes and index ETFs." />
-    <meta property="og:title" content="FolioAudit" />
-    <meta property="og:description" content="Mutual fund and ETF portfolio overlap analysis tool for Indian equity schemes and index ETFs." />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Mutual Fund Portfolio Overlap Tool - Find Overlapping Stocks | FolioAudit</title>
+    <meta name="title" content="Mutual Fund Portfolio Overlap Tool - Find Overlapping Stocks | FolioAudit" />
+    <meta name="description" content="Use the FolioAudit Mutual Funds Portfolio Overlap tool! It identifies common stocks and calculates overlap between mutual fund schemes &amp; ETFs. Find overlapping stocks now!" />
+    <meta name="keywords" content="mutual fund portfolio overlap tool, compare mutual funds, mutual fund comparison, find overlapping stocks, portfolio overlap calculator, Indian mutual funds overlap, ETF overlap, Nifty 50 overlap, portfolio diversification" />
+    <meta name="author" content="FolioAudit" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://folioaudit.vercel.app/" />
+
+    <!-- App Favicon and Apple Touch Icons (Custom FolioAudit Logo) -->
+    <link rel="icon" type="image/jpeg" href="https://i.imgur.com/rzIOCaN.jpeg" />
+    <link rel="shortcut icon" type="image/jpeg" href="https://i.imgur.com/rzIOCaN.jpeg" />
+    <link rel="apple-touch-icon" href="https://i.imgur.com/rzIOCaN.jpeg" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:url" content="https://folioaudit.vercel.app/" />
+    <meta property="og:site_name" content="FolioAudit" />
+    <meta property="og:title" content="Mutual Fund Portfolio Overlap Tool - Find Overlapping Stocks | FolioAudit" />
+    <meta property="og:description" content="Use the FolioAudit Mutual Funds Portfolio Overlap tool! It identifies common stocks and calculates overlap between mutual fund schemes &amp; ETFs. Find overlapping stocks now!" />
+    <meta property="og:image" content="https://i.imgur.com/rzIOCaN.jpeg" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:url" content="https://folioaudit.vercel.app/" />
+    <meta name="twitter:title" content="Mutual Fund Portfolio Overlap Tool - Find Overlapping Stocks | FolioAudit" />
+    <meta name="twitter:description" content="Use the FolioAudit Mutual Funds Portfolio Overlap tool! It identifies common stocks and calculates overlap between mutual fund schemes &amp; ETFs. Find overlapping stocks now!" />
+    <meta name="twitter:image" content="https://i.imgur.com/rzIOCaN.jpeg" />
+
+    <!-- Google Structured Data: WebSite & Breadcrumbs for Google Search snippet formatting -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://folioaudit.vercel.app/#website",
+          "url": "https://folioaudit.vercel.app/",
+          "name": "FolioAudit",
+          "description": "Mutual Fund Portfolio Overlap Tool - Find Overlapping Stocks",
+          "publisher": {
+            "@type": "Organization",
+            "name": "FolioAudit",
+            "url": "https://folioaudit.vercel.app/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://i.imgur.com/rzIOCaN.jpeg"
+            }
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://folioaudit.vercel.app/#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "FolioAudit",
+              "item": "https://folioaudit.vercel.app/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Mutual Funds",
+              "item": "https://folioaudit.vercel.app/#mutual-funds"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Portfolio Overlap",
+              "item": "https://folioaudit.vercel.app/#portfolio-overlap"
+            }
+          ]
+        },
+        {
+          "@type": "WebApplication",
+          "name": "FolioAudit Mutual Fund Portfolio Overlap Tool",
+          "url": "https://folioaudit.vercel.app/",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "All",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR"
+          },
+          "image": "https://i.imgur.com/rzIOCaN.jpeg",
+          "description": "Calculate exact weighted stock overlap and sector concentration between Indian equity mutual funds and index ETFs."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How is mutual fund portfolio overlap calculated?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Portfolio overlap is calculated by summing the minimum percentage weight of common stocks held by two mutual fund schemes: Overlap(A, B) = ∑ min(Weight_A(i), Weight_B(i))."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is an acceptable mutual fund portfolio overlap percentage?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "An overlap below 30% is considered healthy diversification. Overlap between 30% and 50% represents moderate correlation, while an overlap above 50% indicates significant portfolio duplication."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GN8ZM0CDF"></script>
     <script>
