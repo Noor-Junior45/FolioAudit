@@ -9,7 +9,9 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   Calculator, 
-  ShieldAlert
+  ShieldAlert,
+  Building2,
+  Wallet
 } from 'lucide-react';
 
 export const KnowledgeAndGuide: React.FC = () => {
@@ -240,6 +242,87 @@ export const KnowledgeAndGuide: React.FC = () => {
             <div className="pt-3 border-t border-neutral-200/60 text-[11px] text-neutral-500 font-mono">
               Target: Maintain total portfolio overlap below 35%
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Part 3: Brokerage & Demat Compatibility (Groww, Zerodha, Kite, Indmoney, Angel One & Top AMCs) */}
+      <div id="demat-amc-compatibility" className="space-y-4 pt-2 border-t border-neutral-200/70">
+        <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+          <Building2 className="w-4 h-4 text-neutral-700" />
+          <h3>Compatible with Demat Portfolios & Top Indian AMCs</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Card: Demat Accounts */}
+          <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/70 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-900 uppercase tracking-wider">
+              <Wallet className="w-4 h-4 text-indigo-600" />
+              <span>Supported Demat & Brokerage Platforms</span>
+            </div>
+            <p className="text-xs text-neutral-600 leading-relaxed">
+              Invest through discount brokers or wealth apps? FolioAudit lets you audit schemes bought via:
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {[
+                'Groww',
+                'Zerodha Coin / Kite',
+                'INDmoney',
+                'Angel One',
+                'Upstox',
+                'Kuvera',
+                'Dhan',
+                'Paytm Money',
+                'Direct AMC Portals'
+              ].map((platform) => (
+                <span
+                  key={platform}
+                  className="px-2.5 py-1 rounded-lg bg-white border border-neutral-200 text-[11.5px] font-medium text-neutral-800 shadow-2xs"
+                >
+                  {platform}
+                </span>
+              ))}
+            </div>
+            <p className="text-[11px] text-neutral-500 leading-snug pt-2 border-t border-neutral-200/60">
+              No account login or portfolio sync required — simply select your funds above to see exact holding overlap.
+            </p>
+          </div>
+
+          {/* Card: Top Indian AMCs */}
+          <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/70 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-900 uppercase tracking-wider">
+              <Building2 className="w-4 h-4 text-teal-600" />
+              <span>Coverage of Top Indian Fund Houses</span>
+            </div>
+            <p className="text-xs text-neutral-600 leading-relaxed">
+              Updated monthly according to SEBI statutory month-end disclosures across leading AMCs:
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {[
+                'Parag Parikh',
+                'HDFC Mutual Fund',
+                'SBI Mutual Fund',
+                'ICICI Prudential',
+                'Quant Mutual Fund',
+                'Nippon India',
+                'Mirae Asset',
+                'Tata Mutual Fund',
+                'Axis Mutual Fund',
+                'Bandhan Mutual Fund',
+                'UTI Mutual Fund',
+                'Nifty 50 & Next 50 ETFs'
+              ].map((amc) => (
+                <span
+                  key={amc}
+                  className="px-2.5 py-1 rounded-lg bg-white border border-neutral-200 text-[11.5px] font-medium text-neutral-800 shadow-2xs"
+                >
+                  {amc}
+                </span>
+              ))}
+            </div>
+            <p className="text-[11px] text-neutral-500 leading-snug pt-2 border-t border-neutral-200/60">
+              Includes large-cap, flexi-cap, mid-cap, small-cap, focused, ELSS, and index schemes.
+            </p>
           </div>
         </div>
       </div>
