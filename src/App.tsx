@@ -142,17 +142,20 @@ export default function App() {
 
           {!isLoadingFunds && backendFunds.length === 0 && (
             <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs flex items-start gap-3">
-              <Database className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+              <Database className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <div className="font-semibold text-neutral-900">
                   {backendStatus.source === 'unconfigured'
-                    ? 'Backend Database Not Configured'
-                    : 'No Funds Found in Backend'}
+                    ? 'Database Connection Not Configured'
+                    : backendStatus.source === 'error'
+                    ? 'Database Connection / API Error'
+                    : 'No Mutual Funds Found in Database'}
                 </div>
-                <p className="text-neutral-500">
-                  {backendStatus.source === 'unconfigured'
-                    ? 'Add your Neon Postgres connection string (DATABASE_URL) in Settings to load funds.'
-                    : 'Connected to Neon Postgres, but no fund records were found in the database. Insert your schemes into the funds table to compare them.'}
+                <p className="text-neutral-500 leading-relaxed">
+                  {backendStatus.message ||
+                    (backendStatus.source === 'unconfigured'
+                      ? 'Add your Neon Postgres connection string (DATABASE_URL or POSTGRES_URL) in your Vercel Project Settings > Environment Variables or AI Studio Settings.'
+                      : 'Connected to Neon Postgres, but no fund records were found in the funds table.')}
                 </p>
               </div>
             </div>

@@ -1,7 +1,51 @@
 import { Router } from 'express';
-import { getNeonSql, isNeonConfigured } from './db.js';
+import { getNeonSql, isNeonConfigured, testNeonConnection, getDetectedEnvVar } from './db.js';
 
 export const apiRouter = Router();
+
+// Health check endpoint
+apiRouter.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    neonConfigured: isNeonConfigured(),
+    detectedEnvVar: getDetectedEnvVar()?.name || null,
+  });
+});
+
+// Neon connection status endpoint with environment diagnostics (safe, no passwords revealed)
+apiRouter.get('/neon/status', async (_req, res) => {
+  try {
+    const configured = isNeonConfigured();
+    const detected = getDetectedEnvVar();
+
+    if (!configured) {
+      return res.json({
+        configured: false,
+        connected: false,
+        detectedEnvVar: null,
+        message:
+          'No database URL found in environment. Please add DATABASE_URL or POSTGRES_URL to your Vercel Project Settings > Environment Variables or AI Studio Settings.',
+      });
+    }
+
+    const connection = await testNeonConnection();
+    return res.json({
+      configured: true,
+      connected: connection.ok,
+      detectedEnvVar: detected?.name || null,
+      database: connection.database,
+      version: connection.version,
+      fundCount: connection.fundCount ?? 0,
+      error: connection.error,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      configured: isNeonConfigured(),
+      connected: false,
+      error: error?.message || 'Error checking Neon connection',
+    });
+  }
+});
 
 /**
  * Ensures Neon tables exist according to the specified schema:
@@ -17,7 +61,7 @@ export async function ensureNeonSchema() {
 
     await sql`
       CREATE TABLE IF NOT EXISTS funds (
-        id VARCHAR(100) PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         scheme_code VARCHAR(50),
         name TEXT NOT NULL,
         amc VARCHAR(255),
@@ -39,7 +83,7 @@ export async function ensureNeonSchema() {
     await sql`
       CREATE TABLE IF NOT EXISTS holdings (
         id SERIAL PRIMARY KEY,
-        fund_id VARCHAR(100) REFERENCES funds(id) ON DELETE CASCADE,
+        fund_id INTEGER REFERENCES funds(id) ON DELETE CASCADE,
         stock_id INTEGER REFERENCES stocks(id) ON DELETE CASCADE,
         quantity NUMERIC DEFAULT 0,
         market_value_lacs NUMERIC DEFAULT 0,
@@ -63,7 +107,8 @@ apiRouter.get('/funds', async (req, res) => {
     return res.json({
       source: 'unconfigured',
       funds: [],
-      message: 'DATABASE_URL is not configured. Please add your Neon connection string in Settings.'
+      message:
+        'DATABASE_URL or POSTGRES_URL is not configured. Please add your Neon connection string in your Vercel Project Settings > Environment Variables or AI Studio Settings.',
     });
   }
 
@@ -101,14 +146,15 @@ apiRouter.get('/funds', async (req, res) => {
     return res.json({
       source: 'neon',
       funds: fundsWithHoldings,
-      count: fundsWithHoldings.length
+      count: fundsWithHoldings.length,
     });
   } catch (error: any) {
     console.error('Error fetching funds from Neon:', error);
     return res.status(500).json({
       source: 'error',
       funds: [],
-      error: error?.message || 'Database query error'
+      error: error?.message || 'Database query error',
+      message: `Neon query error: ${error?.message || 'Failed to query funds table'}`,
     });
   }
 });
