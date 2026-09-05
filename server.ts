@@ -2,12 +2,16 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { isNeonConfigured, testNeonConnection } from './server/db.js';
+import { apiRouter, ensureNeonSchemaAndSeed } from './server/routes.js';
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Mount Neon API routes
+  app.use('/api', apiRouter);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
@@ -61,6 +65,9 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
+    if (isNeonConfigured()) {
+      ensureNeonSchemaAndSeed().catch((e) => console.error('Init Neon schema error:', e));
+    }
   });
 }
 
