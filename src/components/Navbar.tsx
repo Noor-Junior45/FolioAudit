@@ -1,17 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { checkNeonStatus } from '../utils/api';
-import { Database, ShieldCheck } from 'lucide-react';
+import React from 'react';
 
 export const Navbar: React.FC = () => {
-  const [neonStatus, setNeonStatus] = useState<{ configured: boolean; connected: boolean; database?: string }>({
-    configured: false,
-    connected: false,
-  });
-
-  useEffect(() => {
-    checkNeonStatus().then(setNeonStatus);
-  }, []);
-
   return (
     <header 
       id="top-navbar" 
@@ -30,30 +19,6 @@ export const Navbar: React.FC = () => {
             <span className="text-red-600">Audit</span>
           </h1>
         </a>
-
-        {/* Live Data & Backend Status Badge */}
-        <div className="flex items-center gap-2">
-          {neonStatus.connected ? (
-            <div 
-              id="neon-status-connected" 
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
-              title={`Connected to Neon Postgres (${neonStatus.database || 'main'})`}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <Database className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Neon SQL Live</span>
-            </div>
-          ) : (
-            <div 
-              id="neon-status-statutory" 
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-600 text-xs font-medium"
-              title="Sourced from statutory AMC month-end portfolio disclosures"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
-              <span className="hidden sm:inline">SEBI Statutory Disclosures</span>
-            </div>
-          )}
-        </div>
       </div>
     </header>
   );

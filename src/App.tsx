@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Loader2, Database } from 'lucide-react';
 import { Fund } from './types';
-import { MOCK_FUNDS } from './data/mockFunds';
 import { Navbar } from './components/Navbar';
 import { TransposedTable } from './components/TransposedTable';
 import { CircularOverlapChart } from './components/CircularOverlapChart';
@@ -9,6 +8,7 @@ import { PairwiseMatrix } from './components/PairwiseMatrix';
 import { KnowledgeAndGuide } from './components/KnowledgeAndGuide';
 import { LegalFooter } from './components/LegalFooter';
 import { ConsentModal } from './components/ConsentModal';
+import { fetchBackendFunds } from './utils/api';
 import {
   getSavedAdsConsent,
   applyGtagConsent,
@@ -17,7 +17,6 @@ import {
 import {
   trackFundSelect,
   trackFundComparison,
-  trackSectionView,
 } from './utils/analytics';
 
 const FUND_COLORS = [
@@ -28,13 +27,10 @@ const FUND_COLORS = [
 ];
 
 export default function App() {
-  // All 4 funds pre-selected for rich 4-circle Venn overlap visualization
-  const [selectedFunds, setSelectedFunds] = useState<(Fund | null)[]>([
-    MOCK_FUNDS[0], // Fund 1: Parag Parikh Flexi Cap Fund
-    MOCK_FUNDS[1], // Fund 2: HDFC Nifty 50 ETF
-    MOCK_FUNDS[2], // Fund 3: Mirae Large & Midcap Fund
-    MOCK_FUNDS[3]  // Fund 4: Quant Active Fund
-  ]);
+  const [backendFunds, setBackendFunds] = useState<Fund[]>([]);
+  const [isLoadingFunds, setIsLoadingFunds] = useState<boolean>(true);
+  const [backendStatus, setBackendStatus] = useState<{ source: string; message?: string }>({ source: 'loading' });
+  const [selectedFunds, setSelectedFunds] = useState<(Fund | null)[]>([null, null, null, null]);
 
   // Consent modal state: NOT shown until user presses consent button in footer
   const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
@@ -43,6 +39,36 @@ export default function App() {
   useEffect(() => {
     // Initialize default consent: Google Analytics is active by default
     initDefaultConsent();
+  }, []);
+
+  // Fetch only backend funds on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function loadFunds() {
+      setIsLoadingFunds(true);
+      const res = await fetchBackendFunds();
+      if (!isMounted) return;
+
+      setBackendFunds(res.funds);
+      setBackendStatus({ source: res.source, message: res.message });
+
+      if (res.funds && res.funds.length > 0) {
+        setSelectedFunds([
+          res.funds[0] || null,
+          res.funds[1] || null,
+          res.funds[2] || null,
+          res.funds[3] || null,
+        ]);
+      } else {
+        setSelectedFunds([null, null, null, null]);
+      }
+      setIsLoadingFunds(false);
+    }
+
+    loadFunds();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Track active fund comparisons in Google Analytics whenever selected funds change
@@ -115,8 +141,34 @@ export default function App() {
             </div>
           </div>
 
+          {isLoadingFunds && (
+            <div className="flex items-center justify-center py-6 text-xs text-neutral-500 gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />
+              <span>Loading funds from backend database...</span>
+            </div>
+          )}
+
+          {!isLoadingFunds && backendFunds.length === 0 && (
+            <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs flex items-start gap-3">
+              <Database className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <div className="font-semibold text-neutral-900">
+                  {backendStatus.source === 'unconfigured'
+                    ? 'Backend Database Not Configured'
+                    : 'No Funds Found in Backend'}
+                </div>
+                <p className="text-neutral-500">
+                  {backendStatus.source === 'unconfigured'
+                    ? 'Add your Neon Postgres connection string (DATABASE_URL) in Settings to load funds.'
+                    : 'Connected to Neon Postgres, but no fund records were found in the database. Insert your schemes into the funds table to compare them.'}
+                </p>
+              </div>
+            </div>
+          )}
+
           <TransposedTable
             funds={selectedFunds}
+            allFunds={backendFunds}
             fundColors={FUND_COLORS}
             onSelectFund={handleSelectFund}
             onClearFund={handleClearFund}

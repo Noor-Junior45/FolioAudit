@@ -5,6 +5,7 @@ import { getUnionStocks } from '../utils/overlapCalculator';
 
 interface TransposedTableProps {
   funds: (Fund | null)[];
+  allFunds: Fund[];
   fundColors: string[];
   onSelectFund: (index: number, fund: Fund) => void;
   onClearFund: (index: number) => void;
@@ -12,6 +13,7 @@ interface TransposedTableProps {
 
 export const TransposedTable: React.FC<TransposedTableProps> = ({
   funds,
+  allFunds,
   fundColors,
   onSelectFund,
   onClearFund
@@ -62,6 +64,9 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
               {funds.map((fund, index) => {
                 const rowLabel = `Fund ${index + 1}`;
                 const isRemovable = index >= 2;
+                const otherSelectedIds = funds
+                  .filter((f, i): f is Fund => i !== index && f !== null)
+                  .map((f) => f.id);
 
                 return (
                   <th
@@ -71,13 +76,15 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
                   >
                     <FundCombobox
                       selectedFund={fund}
+                      allFunds={allFunds}
+                      excludedFundIds={otherSelectedIds}
                       onSelect={(f) => onSelectFund(index, f)}
                       onClear={() => onClearFund(index)}
                       rowLabel={rowLabel}
                       isRemovable={isRemovable}
                       color={fundColors[index]}
                       dropdownAlign={index >= 2 ? 'right' : 'left'}
-                      placeholder={`Search fund ${index + 1}...`}
+                      placeholder={`Select fund ${index + 1}...`}
                     />
                   </th>
                 );

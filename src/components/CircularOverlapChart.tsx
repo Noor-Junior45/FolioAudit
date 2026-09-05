@@ -24,6 +24,26 @@ type InspectionType =
   | { kind: 'cross'; pairKey: string; indexA: number; indexB: number }
   | { kind: 'fund'; fundIndex: number };
 
+// Helper to wrap long mutual fund names into two clean lines
+function getWrappedNameLines(name: string, maxChars = 22): [string, string] {
+  if (!name) return ['', ''];
+  const clean = name.trim();
+  if (clean.length <= maxChars) return [clean, ''];
+  const words = clean.split(' ');
+  const line1Words: string[] = [];
+  let currentLen = 0;
+  let i = 0;
+  while (i < words.length && (currentLen + words[i].length <= maxChars || line1Words.length === 0)) {
+    line1Words.push(words[i]);
+    currentLen += words[i].length + 1;
+    i++;
+  }
+  const line1 = line1Words.join(' ');
+  const remaining = words.slice(i).join(' ');
+  const line2 = remaining.length > maxChars + 6 ? remaining.slice(0, maxChars + 4) + '…' : remaining;
+  return [line1, line2];
+}
+
 export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
   funds,
   fundColors
@@ -66,7 +86,7 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
   // 4 Adjacent Petals:
   // Petal 0-1: Top & Left
   // Petal 0-3: Top & Right
-  // Petal 2-1: Bottom & Left
+  // Petal 1-2: Bottom & Left
   // Petal 2-3: Bottom & Right
   const petals = [
     {
@@ -77,8 +97,8 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
       title: 'Top × Left',
       color: '#FF6B4A',
       patternId: 'petal-h-stripes',
-      cx: 298,
-      cy: 298,
+      cx: 480,
+      cy: 350,
       clipCircleId: 'clip-circle-0',
       fillCircleIndex: 1
     },
@@ -90,8 +110,8 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
       title: 'Top × Right',
       color: '#00A896',
       patternId: 'petal-dots',
-      cx: 422,
-      cy: 298,
+      cx: 600,
+      cy: 350,
       clipCircleId: 'clip-circle-0',
       fillCircleIndex: 3
     },
@@ -103,8 +123,8 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
       title: 'Bottom × Left',
       color: '#0284C7',
       patternId: 'petal-grid',
-      cx: 298,
-      cy: 422,
+      cx: 480,
+      cy: 470,
       clipCircleId: 'clip-circle-2',
       fillCircleIndex: 1
     },
@@ -116,8 +136,8 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
       title: 'Bottom × Right',
       color: '#334155',
       patternId: 'petal-diag-stripes',
-      cx: 422,
-      cy: 422,
+      cx: 600,
+      cy: 470,
       clipCircleId: 'clip-circle-2',
       fillCircleIndex: 3
     }
@@ -208,22 +228,76 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
   // Determine which item is currently in focus for inspection
   const activeFocus = hoveredItem || selectedItem;
 
-  // Geometry constants for the 4-circle cloverleaf
-  const svgSize = 720;
-  const centerCoord = 360;
-  const circleRadius = 155;
+  // Geometry constants for the 4-circle cloverleaf diagram with outside label cards
+  const svgWidth = 1080;
+  const svgHeight = 820;
+  const centerCoordX = 540;
+  const centerCoordY = 410;
+  const circleRadius = 135;
   const offset = 120;
 
   // Circle centers:
-  // 0: Top (360, 360 - 120 = 240)
-  // 1: Left (360 - 120 = 240, 360)
-  // 2: Bottom (360, 360 + 120 = 480)
-  // 3: Right (360 + 120 = 480, 360)
+  // 0: Top (540, 410 - 120 = 290)
+  // 1: Left (540 - 120 = 420, 410)
+  // 2: Bottom (540, 410 + 120 = 530)
+  // 3: Right (540 + 120 = 660, 410)
   const circleCoordinates = [
-    { cx: 360, cy: 240, textY: 155, label: 'Fund 1 (Top)' },
-    { cx: 240, cy: 360, textX: 155, label: 'Fund 2 (Left)' },
-    { cx: 360, cy: 480, textY: 565, label: 'Fund 3 (Bottom)' },
-    { cx: 480, cy: 360, textX: 565, label: 'Fund 4 (Right)' }
+    { cx: 540, cy: 290, role: 'Fund 1 (Top)', shortRole: 'F1', innerTextY: 245 },
+    { cx: 420, cy: 410, role: 'Fund 2 (Left)', shortRole: 'F2', innerTextY: 410 },
+    { cx: 540, cy: 530, role: 'Fund 3 (Bottom)', shortRole: 'F3', innerTextY: 575 },
+    { cx: 660, cy: 410, role: 'Fund 4 (Right)', shortRole: 'F4', innerTextY: 410 }
+  ];
+
+  // 4 Outer Cards positioned strictly outside the circles with balanced leader indicator lines
+  const outerCards = [
+    // Top Fund
+    {
+      index: 0,
+      role: 'Fund 1 (Top)',
+      shortRole: 'F1',
+      cardX: 540,
+      cardY: 66,
+      cardW: 300,
+      cardH: 74,
+      lineFrom: { x: 540, y: 103 },
+      lineTo: { x: 540, y: 155 }
+    },
+    // Left Fund (Fund 2) - clean connecting line to the left circle
+    {
+      index: 1,
+      role: 'Fund 2 (Left)',
+      shortRole: 'F2',
+      cardX: 122,
+      cardY: 410,
+      cardW: 216,
+      cardH: 86,
+      lineFrom: { x: 230, y: 410 },
+      lineTo: { x: 285, y: 410 }
+    },
+    // Bottom Fund
+    {
+      index: 2,
+      role: 'Fund 3 (Bottom)',
+      shortRole: 'F3',
+      cardX: 540,
+      cardY: 754,
+      cardW: 300,
+      cardH: 74,
+      lineFrom: { x: 540, y: 717 },
+      lineTo: { x: 540, y: 665 }
+    },
+    // Right Fund (Fund 4) - clean connecting line to the right circle
+    {
+      index: 3,
+      role: 'Fund 4 (Right)',
+      shortRole: 'F4',
+      cardX: 958,
+      cardY: 410,
+      cardW: 216,
+      cardH: 86,
+      lineFrom: { x: 850, y: 410 },
+      lineTo: { x: 795, y: 410 }
+    }
   ];
 
   // Helper to check if a circle is highlighted
@@ -294,74 +368,126 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
           </div>
 
           <svg
-            viewBox={`0 0 ${svgSize} ${svgSize}`}
-            className="w-full max-w-[540px] h-auto overflow-visible select-none drop-shadow-xs"
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            className="w-full max-w-[720px] h-auto overflow-visible select-none drop-shadow-xs"
           >
             <defs>
-              {/* Pattern 1: Horizontal Stripes (Top-Left Petal: F1 x F2) */}
+              {/* Pattern 1: Redesigned Diagonal Precision Hatch with Micro-dots (Top-Left Petal: F1 x F2) */}
               <pattern
                 id="petal-h-stripes"
-                width="8"
-                height="8"
+                width="10"
+                height="10"
                 patternUnits="userSpaceOnUse"
+                patternTransform="rotate(45)"
               >
                 <line
                   x1="0"
-                  y1="4"
-                  x2="8"
-                  y2="4"
+                  y1="0"
+                  x2="0"
+                  y2="10"
                   stroke="#FF6B4A"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeOpacity="0.85"
+                />
+                <circle
+                  cx="5"
+                  cy="5"
+                  r="1.2"
+                  fill="#FF6B4A"
+                  fillOpacity="0.8"
                 />
               </pattern>
 
-              {/* Pattern 2: Dots Matrix (Top-Right Petal: F1 x F4) */}
+              {/* Pattern 2: Redesigned Precision Isometric Stipple Matrix (Top-Right Petal: F1 x F4) */}
               <pattern
                 id="petal-dots"
-                width="8"
-                height="8"
+                width="10"
+                height="10"
                 patternUnits="userSpaceOnUse"
               >
                 <circle
-                  cx="4"
-                  cy="4"
-                  r="1.8"
+                  cx="5"
+                  cy="5"
+                  r="2.2"
                   fill="#00A896"
-                  fillOpacity="0.9"
+                  fillOpacity="0.85"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="1.1"
+                  fill="#00A896"
+                  fillOpacity="0.5"
+                />
+                <circle
+                  cx="10"
+                  cy="0"
+                  r="1.1"
+                  fill="#00A896"
+                  fillOpacity="0.5"
+                />
+                <circle
+                  cx="0"
+                  cy="10"
+                  r="1.1"
+                  fill="#00A896"
+                  fillOpacity="0.5"
+                />
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="1.1"
+                  fill="#00A896"
+                  fillOpacity="0.5"
                 />
               </pattern>
 
-              {/* Pattern 3: Grid Checkered (Bottom-Left Petal: F2 x F3) */}
+              {/* Pattern 3: Redesigned Architectural Cross-hatch Micro-Grid (Bottom-Left Petal: F2 x F3) */}
               <pattern
                 id="petal-grid"
-                width="8"
-                height="8"
+                width="10"
+                height="10"
                 patternUnits="userSpaceOnUse"
               >
                 <path
-                  d="M 0 4 L 8 4 M 4 0 L 4 8"
+                  d="M 0 5 L 10 5 M 5 0 L 5 10"
                   stroke="#0284C7"
-                  strokeWidth="1.2"
+                  strokeWidth="1.4"
                   strokeOpacity="0.8"
+                />
+                <rect
+                  x="4"
+                  y="4"
+                  width="2"
+                  height="2"
+                  fill="#0284C7"
+                  fillOpacity="0.6"
                 />
               </pattern>
 
-              {/* Pattern 4: Diagonal Lines (Bottom-Right Petal: F3 x F4) */}
+              {/* Pattern 4: Redesigned Diamond Herringbone Weave (Bottom-Right Petal: F3 x F4) */}
               <pattern
                 id="petal-diag-stripes"
-                width="8"
-                height="8"
+                width="10"
+                height="10"
                 patternUnits="userSpaceOnUse"
+                patternTransform="rotate(-45)"
               >
                 <line
                   x1="0"
-                  y1="8"
-                  x2="8"
-                  y2="0"
+                  y1="0"
+                  x2="0"
+                  y2="10"
                   stroke="#334155"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeOpacity="0.85"
+                />
+                <circle
+                  cx="5"
+                  cy="5"
+                  r="1.2"
+                  fill="#334155"
+                  fillOpacity="0.8"
                 />
               </pattern>
 
@@ -395,9 +521,12 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
                 />
               </clipPath>
 
-              {/* Filter for glow on active petal */}
+              {/* Filter for glow on active petal & core */}
               <filter id="badge-shadow" x="-30%" y="-30%" width="160%" height="160%">
                 <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
+              </filter>
+              <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#0F172A" floodOpacity="0.08" />
               </filter>
             </defs>
 
@@ -405,7 +534,6 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
             {circleCoordinates.map((coord, idx) => {
               const fund = funds[idx];
               const isFocused = isCircleActive(idx);
-              const color = fundColors[idx] || fundPositions[idx].defaultColor;
 
               return (
                 <circle
@@ -430,8 +558,14 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
               const overlapData = pairwiseMap.get(petal.pairKey);
               const isActive = isPetalActive(petal.pairKey);
               const fillCoord = circleCoordinates[petal.fillCircleIndex];
+              const hasOverlap = Boolean(isEnabled && overlapData && overlapData.overlapPercentage > 0);
 
               if (!isEnabled) {
+                return null;
+              }
+
+              // User requirement: If zero overlap between two funds, do NOT create shade or touch it!
+              if (!hasOverlap) {
                 return null;
               }
 
@@ -535,6 +669,7 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
               const isEnabled = fundA !== null && fundB !== null;
               const overlapData = pairwiseMap.get(petal.pairKey);
               const isActive = isPetalActive(petal.pairKey);
+              const hasOverlap = Boolean(isEnabled && overlapData && overlapData.overlapPercentage > 0);
 
               if (!isEnabled || !overlapData) return null;
 
@@ -561,43 +696,70 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
                   }
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  {/* Outer white base */}
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r={isActive ? 22 : 18}
-                    fill="#FFFFFF"
-                    stroke="#E2E8F0"
-                    strokeWidth="1.5"
-                    filter="url(#badge-shadow)"
-                    className="transition-all duration-200"
-                  />
-                  {/* Distinct target ring matching reference */}
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r={isActive ? 17 : 14}
-                    fill="none"
-                    stroke={petal.color}
-                    strokeWidth={isActive ? 3.5 : 3}
-                    className="transition-all duration-200"
-                  />
-                  {/* Center percentage text */}
-                  <text
-                    x="0"
-                    y="3.5"
-                    textAnchor="middle"
-                    className="text-[10px] font-mono font-bold fill-neutral-900 pointer-events-none select-none"
-                  >
-                    {overlapData.overlapPercentage.toFixed(0)}%
-                  </text>
+                  {hasOverlap ? (
+                    <>
+                      {/* Outer white base */}
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r={isActive ? 22 : 18}
+                        fill="#FFFFFF"
+                        stroke="#E2E8F0"
+                        strokeWidth="1.5"
+                        filter="url(#badge-shadow)"
+                        className="transition-all duration-200"
+                      />
+                      {/* Distinct target ring matching reference */}
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r={isActive ? 17 : 14}
+                        fill="none"
+                        stroke={petal.color}
+                        strokeWidth={isActive ? 3.5 : 3}
+                        className="transition-all duration-200"
+                      />
+                      {/* Center percentage text */}
+                      <text
+                        x="0"
+                        y="3.5"
+                        textAnchor="middle"
+                        className="text-[10px] font-mono font-bold fill-neutral-900 pointer-events-none select-none"
+                      >
+                        {overlapData.overlapPercentage.toFixed(0)}%
+                      </text>
+                    </>
+                  ) : (
+                    <>
+                      {/* Zero overlap badge: neutral dashed ring, no colored shade */}
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r={isActive ? 18 : 15}
+                        fill="#FFFFFF"
+                        stroke="#CBD5E1"
+                        strokeWidth="1.5"
+                        strokeDasharray="3 2"
+                        filter="url(#badge-shadow)"
+                        className="transition-all duration-200"
+                      />
+                      <text
+                        x="0"
+                        y="3.5"
+                        textAnchor="middle"
+                        className="text-[9px] font-mono font-semibold fill-neutral-400 pointer-events-none select-none"
+                      >
+                        0%
+                      </text>
+                    </>
+                  )}
                 </g>
               );
             })}
 
             {/* Step 5: Center Hub (Stocks common to ALL active funds) */}
             <g
-              transform={`translate(${centerCoord}, ${centerCoord})`}
+              transform={`translate(${centerCoordX}, ${centerCoordY})`}
               className="cursor-pointer"
               onClick={() => setSelectedItem({ kind: 'core' })}
               onMouseEnter={() => setHoveredItem({ kind: 'core' })}
@@ -652,202 +814,235 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
               </text>
             </g>
 
-            {/* Step 6: Text Inside Each of the 4 Circles */}
-            {/* Top Circle Text (Fund 1) */}
-            <g
-              transform="translate(360, 140)"
-              className="pointer-events-none select-none text-center"
-            >
-              {funds[0] ? (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="0"
-                    className="text-xs font-bold fill-[#00A896]"
-                  >
-                    {funds[0].shortName}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="16"
-                    className="text-[10px] font-medium fill-neutral-600"
-                  >
-                    {funds[0].category}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="30"
-                    className="text-[10px] font-mono font-semibold fill-neutral-900"
-                  >
-                    {funds[0].holdings.length} Holdings
-                  </text>
-                </>
-              ) : (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="0"
-                    className="text-xs font-medium fill-neutral-400"
-                  >
-                    + Select Fund 1
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="16"
-                    className="text-[10px] fill-neutral-400 font-mono"
-                  >
-                    Top Column in Table
-                  </text>
-                </>
-              )}
-            </g>
+            {/* Step 6: Text Inside Each of the 4 Circles (Minimal F1-F4 badge & stock count) */}
+            {circleCoordinates.map((coord, idx) => {
+              const fund = funds[idx];
+              const isFocused = isCircleActive(idx);
+              const color = fundColors[idx] || fundPositions[idx].defaultColor;
 
-            {/* Left Circle Text (Fund 2) */}
-            <g
-              transform="translate(160, 360)"
-              className="pointer-events-none select-none text-center"
-            >
-              {funds[1] ? (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="-12"
-                    className="text-xs font-bold fill-[#FF6B4A]"
-                  >
-                    {funds[1].shortName}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="4"
-                    className="text-[10px] font-medium fill-neutral-600"
-                  >
-                    {funds[1].category}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="18"
-                    className="text-[10px] font-mono font-semibold fill-neutral-900"
-                  >
-                    {funds[1].holdings.length} Holdings
-                  </text>
-                </>
-              ) : (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="-4"
-                    className="text-xs font-medium fill-neutral-400"
-                  >
-                    + Select Fund 2
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="12"
-                    className="text-[10px] fill-neutral-400 font-mono"
-                  >
-                    Col 2 in Table
-                  </text>
-                </>
-              )}
-            </g>
+              return (
+                <g
+                  key={`inner-circle-label-${idx}`}
+                  transform={`translate(${coord.cx}, ${coord.innerTextY})`}
+                  className="pointer-events-none select-none text-center"
+                >
+                  {fund ? (
+                    <>
+                      <circle
+                        cx="0"
+                        cy="-10"
+                        r="16"
+                        fill={isFocused ? color : '#F8FAFC'}
+                        stroke={color}
+                        strokeWidth="1.5"
+                        className="transition-colors duration-200"
+                      />
+                      <text
+                        textAnchor="middle"
+                        y="-5"
+                        className={`text-[10px] font-mono font-bold ${
+                          isFocused ? 'fill-white' : 'fill-neutral-900'
+                        }`}
+                      >
+                        {coord.shortRole}
+                      </text>
+                      <text
+                        textAnchor="middle"
+                        y="14"
+                        className="text-[10px] font-mono font-semibold fill-neutral-700"
+                      >
+                        {fund.holdings.length} stocks
+                      </text>
+                    </>
+                  ) : (
+                    <>
+                      <circle
+                        cx="0"
+                        cy="-8"
+                        r="14"
+                        fill="#F1F5F9"
+                        stroke="#CBD5E1"
+                        strokeWidth="1"
+                        strokeDasharray="3 2"
+                      />
+                      <text
+                        textAnchor="middle"
+                        y="-4"
+                        className="text-[9px] font-mono font-bold fill-neutral-400"
+                      >
+                        {coord.shortRole}
+                      </text>
+                      <text
+                        textAnchor="middle"
+                        y="14"
+                        className="text-[9px] font-mono fill-neutral-400"
+                      >
+                        Empty
+                      </text>
+                    </>
+                  )}
+                </g>
+              );
+            })}
 
-            {/* Bottom Circle Text (Fund 3) */}
-            <g
-              transform="translate(360, 560)"
-              className="pointer-events-none select-none text-center"
-            >
-              {funds[2] ? (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="-14"
-                    className="text-xs font-bold fill-[#0284C7]"
-                  >
-                    {funds[2].shortName}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="2"
-                    className="text-[10px] font-medium fill-neutral-600"
-                  >
-                    {funds[2].category}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="16"
-                    className="text-[10px] font-mono font-semibold fill-neutral-900"
-                  >
-                    {funds[2].holdings.length} Holdings
-                  </text>
-                </>
-              ) : (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="-4"
-                    className="text-xs font-medium fill-neutral-400"
-                  >
-                    + Select Fund 3
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="12"
-                    className="text-[10px] fill-neutral-400 font-mono"
-                  >
-                    Col 3 in Table
-                  </text>
-                </>
-              )}
-            </g>
+            {/* Step 7: Dedicated Mutual Fund Cards Outside Each Circle with Leader Lines */}
+            {outerCards.map((card) => {
+              const fund = funds[card.index];
+              const color = fundColors[card.index] || fundPositions[card.index].defaultColor;
+              const isFocused = isCircleActive(card.index);
+              const [line1, line2] = fund
+                ? getWrappedNameLines(fund.name || fund.shortName, card.index % 2 === 0 ? 26 : 20)
+                : ['', ''];
 
-            {/* Right Circle Text (Fund 4) */}
-            <g
-              transform="translate(560, 360)"
-              className="pointer-events-none select-none text-center"
-            >
-              {funds[3] ? (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="-12"
-                    className="text-xs font-bold fill-[#334155]"
+              return (
+                <g key={`outer-card-${card.index}`}>
+                  {/* Connector line from outer card to circle edge */}
+                  <g
+                    className="pointer-events-none transition-opacity duration-200"
+                    style={{ opacity: isFocused ? 1 : 0.75 }}
                   >
-                    {funds[3].shortName}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="4"
-                    className="text-[10px] font-medium fill-neutral-600"
+                    <line
+                      x1={card.lineFrom.x}
+                      y1={card.lineFrom.y}
+                      x2={card.lineTo.x}
+                      y2={card.lineTo.y}
+                      stroke={fund ? color : '#CBD5E1'}
+                      strokeWidth={isFocused ? 2.5 : 1.75}
+                      strokeDasharray={fund ? '4 3' : '3 3'}
+                    />
+                    {/* Anchor node on the card edge */}
+                    <circle
+                      cx={card.lineFrom.x}
+                      cy={card.lineFrom.y}
+                      r={isFocused ? 3.5 : 2.5}
+                      fill={fund ? color : '#94A3B8'}
+                    />
+                    {/* Boundary indicator node on the circle perimeter */}
+                    <circle
+                      cx={card.lineTo.x}
+                      cy={card.lineTo.y}
+                      r={isFocused ? 5 : 4}
+                      fill={fund ? color : '#94A3B8'}
+                    />
+                  </g>
+
+                  {/* Outer Card */}
+                  <g
+                    className={fund ? 'cursor-pointer' : 'cursor-default'}
+                    onClick={() => {
+                      if (fund) setSelectedItem({ kind: 'fund', fundIndex: card.index });
+                    }}
+                    onMouseEnter={() => {
+                      if (fund) setHoveredItem({ kind: 'fund', fundIndex: card.index });
+                    }}
+                    onMouseLeave={() => setHoveredItem(null)}
                   >
-                    {funds[3].category}
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="18"
-                    className="text-[10px] font-mono font-semibold fill-neutral-900"
-                  >
-                    {funds[3].holdings.length} Holdings
-                  </text>
-                </>
-              ) : (
-                <>
-                  <text
-                    textAnchor="middle"
-                    y="-4"
-                    className="text-xs font-medium fill-neutral-400"
-                  >
-                    + Select Fund 4
-                  </text>
-                  <text
-                    textAnchor="middle"
-                    y="12"
-                    className="text-[10px] fill-neutral-400 font-mono"
-                  >
-                    Col 4 in Table
-                  </text>
-                </>
-              )}
-            </g>
+                    <rect
+                      x={card.cardX - card.cardW / 2}
+                      y={card.cardY - card.cardH / 2}
+                      width={card.cardW}
+                      height={card.cardH}
+                      rx="12"
+                      fill="#FFFFFF"
+                      stroke={fund ? (isFocused ? color : '#CBD5E1') : '#E2E8F0'}
+                      strokeWidth={isFocused ? 2.5 : 1.5}
+                      filter="url(#card-shadow)"
+                      className="transition-all duration-200"
+                    />
+
+                    {fund ? (
+                      <>
+                        {/* Header: Role badge and category */}
+                        <circle
+                          cx={card.cardX - card.cardW / 2 + 16}
+                          cy={card.cardY - card.cardH / 2 + 16}
+                          r="4.5"
+                          fill={color}
+                        />
+                        <text
+                          x={card.cardX - card.cardW / 2 + 26}
+                          y={card.cardY - card.cardH / 2 + 19}
+                          className="text-[10px] font-mono font-bold uppercase tracking-wider"
+                          fill={color}
+                        >
+                          {card.role}
+                        </text>
+                        <text
+                          x={card.cardX + card.cardW / 2 - 14}
+                          y={card.cardY - card.cardH / 2 + 19}
+                          textAnchor="end"
+                          className="text-[10px] font-medium fill-neutral-400"
+                        >
+                          {fund.category}
+                        </text>
+
+                        {/* Mutual Fund Name (cleanly rendered outside circle, wrapped if long) */}
+                        <text
+                          x={card.cardX}
+                          y={card.cardY + (line2 ? -2 : 5)}
+                          textAnchor="middle"
+                          className="text-[11px] font-bold fill-neutral-900 select-none"
+                        >
+                          {line1}
+                        </text>
+                        {line2 && (
+                          <text
+                            x={card.cardX}
+                            y={card.cardY + 13}
+                            textAnchor="middle"
+                            className="text-[11px] font-bold fill-neutral-900 select-none"
+                          >
+                            {line2}
+                          </text>
+                        )}
+
+                        {/* Subtitle / holdings count */}
+                        <text
+                          x={card.cardX}
+                          y={card.cardY + card.cardH / 2 - 10}
+                          textAnchor="middle"
+                          className="text-[9px] font-mono fill-neutral-500 select-none"
+                        >
+                          {fund.holdings.length} Holdings • {fund.amc || 'Mutual Fund'}
+                        </text>
+                      </>
+                    ) : (
+                      <>
+                        <circle
+                          cx={card.cardX - card.cardW / 2 + 16}
+                          cy={card.cardY - card.cardH / 2 + 16}
+                          r="4.5"
+                          fill="#CBD5E1"
+                        />
+                        <text
+                          x={card.cardX - card.cardW / 2 + 26}
+                          y={card.cardY - card.cardH / 2 + 19}
+                          className="text-[10px] font-mono font-semibold uppercase tracking-wider fill-neutral-400"
+                        >
+                          {card.role}
+                        </text>
+                        <text
+                          x={card.cardX}
+                          y={card.cardY + 5}
+                          textAnchor="middle"
+                          className="text-xs font-medium fill-neutral-400 select-none"
+                        >
+                          + Slot Empty
+                        </text>
+                        <text
+                          x={card.cardX}
+                          y={card.cardY + card.cardH / 2 - 10}
+                          textAnchor="middle"
+                          className="text-[9px] font-mono fill-neutral-400 select-none"
+                        >
+                          Select fund in table above
+                        </text>
+                      </>
+                    )}
+                  </g>
+                </g>
+              );
+            })}
           </svg>
 
           {/* Bottom helper prompt */}
