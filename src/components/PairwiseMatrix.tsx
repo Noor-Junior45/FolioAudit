@@ -100,7 +100,19 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
   const hasPairs = pairGroups.some((g) => g.pairs.length > 0);
 
   if (!hasPairs) {
-    return null;
+    return (
+      <div id="pairwise-overlap-matrix" className="w-full p-8 rounded-2xl bg-neutral-50/70 border border-dashed border-neutral-300 text-center space-y-2">
+        <div className="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center mx-auto text-neutral-500 shadow-2xs">
+          <Layers className="w-4 h-4 text-neutral-600" />
+        </div>
+        <div className="text-xs font-semibold text-neutral-800">
+          Pairwise Overlap Matrix
+        </div>
+        <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
+          Select at least two funds in the comparison table above to calculate pairwise stock overlaps and common portfolio weights.
+        </p>
+      </div>
+    );
   }
 
   return (

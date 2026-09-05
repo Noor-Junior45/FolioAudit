@@ -23,6 +23,7 @@ export const FundCombobox: React.FC<FundComboboxProps> = ({
   onSelect,
   onClear,
   rowLabel = 'Fund',
+  color,
   dropdownAlign = 'left',
   placeholder = 'Select fund...'
 }) => {
@@ -94,15 +95,27 @@ export const FundCombobox: React.FC<FundComboboxProps> = ({
       <div
         id={`fund-name-display-${rowLabel.toLowerCase().replace(/\s+/g, '-')}`}
         onClick={toggleDropdown}
-        className={`cursor-pointer py-1.5 px-2 rounded-lg transition-all flex items-center justify-between gap-1.5 group select-none ${
+        className={`cursor-pointer py-2 px-2.5 rounded-xl transition-all flex items-center justify-between gap-2 group select-none ${
           selectedFund
-            ? 'hover:bg-neutral-200/70'
-            : 'border border-dashed border-neutral-300 hover:border-neutral-400 bg-white/80 hover:bg-white text-neutral-500'
+            ? 'hover:bg-neutral-200/70 bg-white/60 border border-neutral-300'
+            : 'border-2 border-dashed border-neutral-300 hover:border-neutral-600 bg-white hover:bg-neutral-50 shadow-2xs'
         }`}
-        title={selectedFund ? 'Click to browse all schemes or swap fund' : 'Click to select a fund'}
+        title={selectedFund ? 'Click to browse all schemes or swap fund' : `Click to choose ${rowLabel}`}
       >
-        <div className="text-xs font-semibold text-neutral-900 leading-snug break-words whitespace-normal flex-1">
-          {selectedFund ? selectedFund.name : placeholder}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span
+            className="w-2.5 h-2.5 rounded-full shrink-0"
+            style={{ backgroundColor: color || '#64748B' }}
+          />
+          <div
+            className={`text-xs leading-snug break-words whitespace-normal flex-1 ${
+              selectedFund
+                ? 'font-semibold text-neutral-900'
+                : 'font-semibold text-neutral-600 group-hover:text-neutral-900'
+            }`}
+          >
+            {selectedFund ? selectedFund.name : placeholder}
+          </div>
         </div>
         <ChevronDown
           className={`w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-900 shrink-0 transition-transform duration-200 ${
@@ -117,7 +130,7 @@ export const FundCombobox: React.FC<FundComboboxProps> = ({
           id={`fund-dropdown-menu-${rowLabel.toLowerCase().replace(/\s+/g, '-')}`}
           className={`absolute ${
             dropdownAlign === 'right' ? 'right-0' : 'left-0'
-          } top-full mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-neutral-200 p-2 min-w-[280px] max-w-[340px] w-full max-h-84 flex flex-col`}
+          } top-full mt-1.5 z-50 bg-white rounded-xl shadow-2xl border border-neutral-200/90 p-2.5 w-[310px] sm:w-[330px] max-h-96 flex flex-col`}
         >
           {/* Search Bar inside Dropdown */}
           <div className="relative mb-2 shrink-0">

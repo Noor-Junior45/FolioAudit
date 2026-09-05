@@ -52,16 +52,8 @@ export default function App() {
       setBackendFunds(res.funds);
       setBackendStatus({ source: res.source, message: res.message });
 
-      if (res.funds && res.funds.length > 0) {
-        setSelectedFunds([
-          res.funds[0] || null,
-          res.funds[1] || null,
-          res.funds[2] || null,
-          res.funds[3] || null,
-        ]);
-      } else {
-        setSelectedFunds([null, null, null, null]);
-      }
+      // Keep all funds unfilled on initial load so visitors can choose their own schemes
+      setSelectedFunds([null, null, null, null]);
       setIsLoadingFunds(false);
     }
 

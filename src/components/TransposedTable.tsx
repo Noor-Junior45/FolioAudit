@@ -36,8 +36,8 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
   return (
     <div id="transposed-comparison-table-section" className="w-full">
       {/* Exchanged Comparison Table: 4 Funds in 1st row, all stocks in rows without separate vertical scroll */}
-      <div className="w-full overflow-x-auto rounded-2xl bg-neutral-50/50 border border-neutral-300 shadow-2xs">
-        <table className="w-full text-left border-separate border-spacing-0 min-w-[760px]">
+      <div className="w-full overflow-x-auto rounded-2xl bg-neutral-50/50 border border-neutral-300 shadow-2xs min-h-[460px]">
+        <table className="w-full text-left border-separate border-spacing-0 min-w-[1080px]">
           <thead className="sticky top-0 z-20 bg-neutral-100 backdrop-blur-sm shadow-xs">
             <tr>
               {/* Column 1 Header: Stock Name / ISIN */}
@@ -84,7 +84,7 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
                       isRemovable={isRemovable}
                       color={fundColors[index]}
                       dropdownAlign={index >= 2 ? 'right' : 'left'}
-                      placeholder={`Select fund ${index + 1}...`}
+                      placeholder={`+ Choose ${rowLabel}...`}
                     />
                   </th>
                 );
@@ -153,9 +153,16 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
               <tr>
                 <td
                   colSpan={5}
-                  className="p-12 text-center text-xs text-neutral-400 font-normal"
+                  className="py-32 px-6 text-center"
                 >
-                  No stocks to display. Please select at least one fund above.
+                  <div className="max-w-md mx-auto space-y-2.5 text-center">
+                    <div className="text-sm font-semibold text-neutral-800">
+                      No funds selected yet
+                    </div>
+                    <p className="text-xs text-neutral-500 leading-relaxed">
+                      Click on any of the dashed boxes above (<strong>+ Choose Fund 1</strong> to <strong>+ Choose Fund 4</strong>) to pick mutual funds or index ETFs and audit their shared equity holdings.
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}

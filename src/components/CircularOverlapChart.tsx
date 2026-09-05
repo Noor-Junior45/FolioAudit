@@ -928,9 +928,17 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
 
                   {/* Outer Card */}
                   <g
-                    className={fund ? 'cursor-pointer' : 'cursor-default'}
+                    className="cursor-pointer"
                     onClick={() => {
-                      if (fund) setSelectedItem({ kind: 'fund', fundIndex: card.index });
+                      if (fund) {
+                        setSelectedItem({ kind: 'fund', fundIndex: card.index });
+                      } else {
+                        const el = document.getElementById(`fund-name-display-fund-${card.index + 1}`);
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          el.click();
+                        }
+                      }
                     }}
                     onMouseEnter={() => {
                       if (fund) setHoveredItem({ kind: 'fund', fundIndex: card.index });
@@ -944,8 +952,9 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
                       height={card.cardH}
                       rx="12"
                       fill="#FFFFFF"
-                      stroke={fund ? (isFocused ? color : '#CBD5E1') : '#E2E8F0'}
+                      stroke={fund ? (isFocused ? color : '#CBD5E1') : '#CBD5E1'}
                       strokeWidth={isFocused ? 2.5 : 1.5}
+                      strokeDasharray={fund ? 'none' : '4 3'}
                       filter="url(#card-shadow)"
                       className="transition-all duration-200"
                     />
@@ -1025,9 +1034,9 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
                           x={card.cardX}
                           y={card.cardY + 5}
                           textAnchor="middle"
-                          className="text-xs font-medium fill-neutral-400 select-none"
+                          className="text-xs font-semibold fill-neutral-700 select-none"
                         >
-                          + Slot Empty
+                          + Choose Fund {card.index + 1}
                         </text>
                         <text
                           x={card.cardX}
@@ -1035,7 +1044,7 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
                           textAnchor="middle"
                           className="text-[9px] font-mono fill-neutral-400 select-none"
                         >
-                          Select fund in table above
+                          Click to select in table above
                         </text>
                       </>
                     )}
@@ -1225,8 +1234,10 @@ export const CircularOverlapChart: React.FC<CircularOverlapChartProps> = ({
                       </div>
                     ))}
                     {coreIntersection.commonStocks.length === 0 && (
-                      <div className="p-4 text-center text-xs text-neutral-500">
-                        No stocks are held across all selected funds simultaneously.
+                      <div className="p-4 text-center text-xs text-neutral-500 leading-relaxed">
+                        {activeFundsList.length < 2
+                          ? 'Select at least two mutual funds in the comparison table above to audit shared core holdings.'
+                          : 'No stocks are held across all selected funds simultaneously.'}
                       </div>
                     )}
                   </div>
