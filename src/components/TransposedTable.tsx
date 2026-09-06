@@ -36,15 +36,14 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
   return (
     <div id="transposed-comparison-table-section" className="w-full">
       {/* Exchanged Comparison Table: 4 Funds in 1st row, all stocks in rows without separate vertical scroll */}
-      {/* Container touches both sides of the screen with border-y and full width */}
-      <div className="w-full overflow-x-auto bg-neutral-50/50 border-y border-neutral-300 shadow-2xs min-h-[460px] scroll-smooth">
+      <div className="w-full overflow-x-auto rounded-xl sm:rounded-2xl bg-neutral-50/50 border border-neutral-300 shadow-2xs min-h-[460px] scroll-smooth">
         <table className="w-full text-left border-separate border-spacing-0 min-w-[940px] sm:min-w-[1080px]">
           <thead className="sticky top-0 z-20 bg-neutral-100 backdrop-blur-sm shadow-xs">
             <tr>
               {/* Column 1 Header: Fixed / Sticky Holdings Column */}
               <th
                 scope="col"
-                className="p-2.5 sm:p-3 w-40 min-w-[140px] max-w-[180px] sm:w-60 sm:min-w-[200px] sm:max-w-[260px] text-xs font-semibold text-neutral-800 align-top border-r border-neutral-300 border-b border-neutral-300 bg-neutral-100 sticky left-0 top-0 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)]"
+                className="pl-4 sm:pl-6 pr-2.5 sm:pr-3 py-2.5 sm:py-3 w-44 min-w-[160px] max-w-[200px] sm:w-64 sm:min-w-[220px] sm:max-w-[280px] text-xs font-semibold text-neutral-800 align-top border-l border-r border-neutral-300 border-b border-neutral-300 bg-neutral-100 sticky left-0 top-0 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)]"
               >
                 <div className="space-y-0.5">
                   <span className="uppercase tracking-wider text-[10px] text-neutral-500 font-semibold block">
@@ -73,7 +72,7 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
                   <th
                     key={`fund-col-${index}`}
                     scope="col"
-                    className="p-2.5 sm:p-3 w-56 min-w-[200px] sm:w-64 sm:min-w-[220px] sm:max-w-[280px] align-top font-normal border-r border-neutral-300 last:border-r-0 border-b border-neutral-300 bg-neutral-100"
+                    className="p-2.5 sm:p-3 w-56 min-w-[200px] sm:w-64 sm:min-w-[220px] sm:max-w-[280px] align-top font-normal border-r border-neutral-300 border-b border-neutral-300 bg-neutral-100"
                   >
                     <FundCombobox
                       selectedFund={fund}
@@ -101,7 +100,7 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
                 className="group hover:bg-neutral-50/80 transition-colors"
               >
                 {/* Column 1: Fixed / Sticky Stock Details stacked */}
-                <td className="p-2.5 sm:p-3 align-top w-40 min-w-[140px] max-w-[180px] sm:w-60 sm:min-w-[200px] sm:max-w-[260px] border-r border-neutral-300 border-b border-neutral-300 sticky left-0 z-10 bg-white group-hover:bg-neutral-50 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)]">
+                <td className="pl-4 sm:pl-6 pr-2.5 sm:pr-3 py-2.5 sm:py-3 align-top w-44 min-w-[160px] max-w-[200px] sm:w-64 sm:min-w-[220px] sm:max-w-[280px] border-l border-r border-neutral-300 border-b border-neutral-300 sticky left-0 z-10 bg-white group-hover:bg-neutral-50 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)]">
                   <div className="space-y-0.5">
                     <div
                       className="text-xs font-semibold text-neutral-900 leading-snug break-words"
@@ -127,7 +126,7 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
                   return (
                     <td
                       key={`${stock.isin}-fund-${fundIndex}`}
-                      className="p-2.5 sm:p-3 align-middle text-center border-r border-neutral-300 last:border-r-0 border-b border-neutral-300"
+                      className="p-2.5 sm:p-3 align-middle text-center border-r border-neutral-300 border-b border-neutral-300"
                     >
                       {fund ? (
                         holding ? (

@@ -104,8 +104,8 @@ export default function App() {
       {/* Main Content Area */}
       <main className="w-full flex-1 flex flex-col space-y-16 pb-0 pt-6">
         {/* 2. The Transposed Comparison Table (Horizontal Scroll) */}
-        <section id="section-transposed-table" className="w-full space-y-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-3">
+        <section id="section-transposed-table" className="max-w-7xl mx-auto px-4 sm:px-6 w-full space-y-6">
+          <div className="space-y-3">
             <div className="pb-2.5 border-b border-neutral-200">
               <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5 text-neutral-700" />
@@ -134,7 +134,7 @@ export default function App() {
           </div>
 
           {isLoadingFunds && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-center py-6 text-xs text-neutral-500 gap-2">
+            <div className="flex items-center justify-center py-6 text-xs text-neutral-500 gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />
               <span>Loading funds from backend database...</span>
             </div>
