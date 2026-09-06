@@ -11,6 +11,8 @@ interface TransposedTableProps {
   onClearFund: (index: number) => void;
 }
 
+const HIGH_WEIGHT_THRESHOLD = 5.0;
+
 export const TransposedTable: React.FC<TransposedTableProps> = ({
   funds,
   allFunds,
@@ -94,60 +96,98 @@ export const TransposedTable: React.FC<TransposedTableProps> = ({
 
           <tbody className="bg-white">
             {/* Rows: Each unique stock across selected funds */}
-            {unionStocks.map((stock) => (
-              <tr
-                key={stock.isin}
-                className="group hover:bg-neutral-50/80 transition-colors"
-              >
-                {/* Column 1: Fixed / Sticky Stock Details stacked */}
-                <td className="pl-4 sm:pl-6 pr-2.5 sm:pr-3 py-2.5 sm:py-3 align-top w-44 min-w-[160px] max-w-[200px] sm:w-64 sm:min-w-[220px] sm:max-w-[280px] border-l border-r border-neutral-300 border-b border-neutral-300 sticky left-0 z-10 bg-white group-hover:bg-neutral-50 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)]">
-                  <div className="space-y-0.5">
-                    <div
-                      className="text-xs font-semibold text-neutral-900 leading-snug break-words"
-                      title={stock.name}
-                    >
-                      {stock.name}
-                    </div>
-                    <div className="text-[11px] font-mono text-neutral-400 leading-tight">
-                      {stock.isin}
-                    </div>
-                    <div className="text-[10px] text-neutral-500 uppercase tracking-wider font-sans leading-tight">
-                      {stock.sector}
-                    </div>
-                  </div>
-                </td>
+            {unionStocks.map((stock) => {
+              // Check if stock is held across multiple selected funds
+              const fundsWithStock = funds.filter(
+                (f, idx) => f && fundHoldingsMap[idx].has(stock.isin)
+              );
+              const isOverlapping = fundsWithStock.length > 1;
 
-                {/* Columns 2 through 5: Weights for Fund 1, Fund 2, Fund 3, Fund 4 */}
-                {funds.map((fund, fundIndex) => {
-                  const holding = fund
-                    ? fundHoldingsMap[fundIndex].get(stock.isin)
-                    : null;
-
-                  return (
-                    <td
-                      key={`${stock.isin}-fund-${fundIndex}`}
-                      className="p-2.5 sm:p-3 align-middle text-center border-r border-neutral-300 border-b border-neutral-300"
-                    >
-                      {fund ? (
-                        holding ? (
-                          <span className="text-xs font-mono font-semibold text-black block">
-                            {holding.weight.toFixed(2)}%
+              return (
+                <tr
+                  key={stock.isin}
+                  className="group hover:bg-neutral-50/80 transition-colors"
+                >
+                  {/* Column 1: Fixed / Sticky Stock Details stacked */}
+                  <td className="pl-4 sm:pl-6 pr-2.5 sm:pr-3 py-2.5 sm:py-3 align-top w-44 min-w-[160px] max-w-[200px] sm:w-64 sm:min-w-[220px] sm:max-w-[280px] border-l border-r border-neutral-300 border-b border-neutral-300 sticky left-0 z-10 bg-white group-hover:bg-neutral-50 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)]">
+                    <div className="space-y-0.5">
+                      <div
+                        className="text-xs font-semibold text-neutral-900 leading-snug break-words flex items-start justify-between gap-1.5"
+                        title={stock.name}
+                      >
+                        <span>{stock.name}</span>
+                        {isOverlapping && (
+                          <span
+                            className="shrink-0 text-[10px] font-medium font-sans px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80"
+                            title={`Held in ${fundsWithStock.length} selected funds`}
+                          >
+                            {fundsWithStock.length} funds
                           </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] font-mono text-neutral-400 leading-tight">
+                        {stock.isin}
+                      </div>
+                      <div className="text-[10px] text-neutral-500 uppercase tracking-wider font-sans leading-tight">
+                        {stock.sector}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Columns 2 through 5: Weights for Fund 1, Fund 2, Fund 3, Fund 4 */}
+                  {funds.map((fund, fundIndex) => {
+                    const holding = fund
+                      ? fundHoldingsMap[fundIndex].get(stock.isin)
+                      : null;
+                    const isHighWeight = Boolean(
+                      holding && holding.weight >= HIGH_WEIGHT_THRESHOLD
+                    );
+
+                    return (
+                      <td
+                        key={`${stock.isin}-fund-${fundIndex}`}
+                        className={`p-2.5 sm:p-3 align-middle text-center border-r border-neutral-300 border-b border-neutral-300 transition-colors ${
+                          isHighWeight
+                            ? 'bg-[#FFFDF0] group-hover:bg-[#FEF9D9]'
+                            : ''
+                        }`}
+                        title={
+                          holding
+                            ? `${stock.name}: ${holding.weight.toFixed(2)}% in ${fund?.name}${
+                                isHighWeight ? ' (High weight >5%)' : ''
+                              }`
+                            : undefined
+                        }
+                      >
+                        {fund ? (
+                          holding ? (
+                            <div className="inline-flex items-center justify-center">
+                              <span
+                                className={`text-xs font-mono block ${
+                                  isHighWeight
+                                    ? 'font-bold text-amber-950'
+                                    : 'font-semibold text-neutral-900'
+                                }`}
+                              >
+                                {holding.weight.toFixed(2)}%
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs font-mono text-neutral-300 block">
+                              —
+                            </span>
+                          )
                         ) : (
-                          <span className="text-xs font-mono font-semibold text-black block">
+                          <span className="text-xs font-mono text-neutral-300 block">
                             —
                           </span>
-                        )
-                      ) : (
-                        <span className="text-xs font-mono font-semibold text-black block">
-                          —
-                        </span>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
 
             {unionStocks.length === 0 && (
               <tr>

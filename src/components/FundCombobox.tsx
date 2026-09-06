@@ -91,31 +91,21 @@ export const FundCombobox: React.FC<FundComboboxProps> = ({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* Clickable Header Display matching CSS selector 1 and child SVG matching CSS selector 2 */}
+      {/* Clickable Header Display: Text only with dropdown chevron, no box and no color dot */}
       <div
         id={`fund-name-display-${rowLabel.toLowerCase().replace(/\s+/g, '-')}`}
         onClick={toggleDropdown}
-        className={`cursor-pointer py-2 px-2.5 rounded-xl transition-all flex items-center justify-between gap-2 group select-none ${
-          selectedFund
-            ? 'hover:bg-neutral-200/70 bg-white/60 border border-neutral-300'
-            : 'border-2 border-dashed border-neutral-300 hover:border-neutral-600 bg-white hover:bg-neutral-50 shadow-2xs'
-        }`}
+        className="cursor-pointer py-1.5 px-2 rounded-md transition-colors flex items-center justify-between gap-1.5 group select-none hover:bg-neutral-200/50"
         title={selectedFund ? 'Click to browse all schemes or swap fund' : `Click to choose ${rowLabel}`}
       >
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span
-            className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: color || '#64748B' }}
-          />
-          <div
-            className={`text-xs leading-snug break-words whitespace-normal flex-1 ${
-              selectedFund
-                ? 'font-semibold text-neutral-900'
-                : 'font-semibold text-neutral-600 group-hover:text-neutral-900'
-            }`}
-          >
-            {selectedFund ? selectedFund.name : placeholder}
-          </div>
+        <div
+          className={`text-xs leading-snug break-words whitespace-normal flex-1 ${
+            selectedFund
+              ? 'font-semibold text-neutral-900 group-hover:text-neutral-950'
+              : 'font-medium text-neutral-500 group-hover:text-neutral-800'
+          }`}
+        >
+          {selectedFund ? selectedFund.name : placeholder}
         </div>
         <ChevronDown
           className={`w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-900 shrink-0 transition-transform duration-200 ${

@@ -127,8 +127,8 @@ export default function App() {
                 <span><strong>Stock Weights:</strong> Inspect company-level percentage allocations</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                <span><strong>Concentration Check:</strong> Identify overlapping stocks across multiple funds</span>
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#FFFDF0] border border-amber-300 shrink-0" />
+                <span><strong>High Weight Highlight (&gt;5%):</strong> Soft cream background draws focus to major overlapping allocations</span>
               </span>
             </div>
           </div>
