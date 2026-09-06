@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SlidersHorizontal, Loader2, Database } from 'lucide-react';
+import { SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Fund } from './types';
 import { Navbar } from './components/Navbar';
 import { TransposedTable } from './components/TransposedTable';
@@ -104,8 +104,8 @@ export default function App() {
       {/* Main Content Area */}
       <main className="w-full flex-1 flex flex-col space-y-16 pb-0 pt-6">
         {/* 2. The Transposed Comparison Table (Horizontal Scroll) */}
-        <section id="section-transposed-table" className="max-w-7xl mx-auto px-6 w-full space-y-6">
-          <div className="space-y-3">
+        <section id="section-transposed-table" className="w-full space-y-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-3">
             <div className="pb-2.5 border-b border-neutral-200">
               <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex items-center gap-2">
                 <SlidersHorizontal className="w-5 h-5 text-neutral-700" />
@@ -134,30 +134,9 @@ export default function App() {
           </div>
 
           {isLoadingFunds && (
-            <div className="flex items-center justify-center py-6 text-xs text-neutral-500 gap-2">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-center py-6 text-xs text-neutral-500 gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />
               <span>Loading funds from backend database...</span>
-            </div>
-          )}
-
-          {!isLoadingFunds && backendFunds.length === 0 && (
-            <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs flex items-start gap-3">
-              <Database className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <div className="font-semibold text-neutral-900">
-                  {backendStatus.source === 'unconfigured'
-                    ? 'Database Connection Not Configured'
-                    : backendStatus.source === 'error'
-                    ? 'Database Connection / API Error'
-                    : 'No Mutual Funds Found in Database'}
-                </div>
-                <p className="text-neutral-500 leading-relaxed">
-                  {backendStatus.message ||
-                    (backendStatus.source === 'unconfigured'
-                      ? 'Add your Neon Postgres connection string (DATABASE_URL or POSTGRES_URL) in your Vercel Project Settings > Environment Variables or AI Studio Settings.'
-                      : 'Connected to Neon Postgres, but no fund records were found in the funds table.')}
-                </p>
-              </div>
             </div>
           )}
 

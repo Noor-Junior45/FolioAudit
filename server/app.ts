@@ -1,6 +1,5 @@
 import express from 'express';
-import { apiRouter, ensureNeonSchema } from './routes.js';
-import { isNeonConfigured } from './db.js';
+import { apiRouter } from './routes.js';
 
 export const app = express();
 
@@ -17,13 +16,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-// Initialize database schema on startup if Neon is configured
-if (isNeonConfigured()) {
-  ensureNeonSchema().catch((err) => {
-    console.error('ensureNeonSchema error:', err);
-  });
-}
 
 // Mount routes at both /api and root to handle any rewrite pathing on Vercel or Express
 app.use('/api', apiRouter);

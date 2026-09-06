@@ -1,9 +1,8 @@
 import { Fund } from '../types';
-
-/**
- * Client-side API caller for FolioAudit backend routes.
- * Communicates with /api/* routes without exposing database credentials.
- */
+import {
+  isClientSupabaseConfigured,
+  fetchFundsDirectFromSupabase,
+} from './supabase';
 
 const FUND_PALETTES = [
   { color: '#00A896', colorLight: '#E6F6F4' },
@@ -17,7 +16,9 @@ const FUND_PALETTES = [
 ];
 
 /**
- * Fetches all mutual funds and ETFs present in the backend database.
+ * Fetches all mutual funds and ETFs present in the Supabase database.
+ * Attempts direct Supabase browser fetch first (via VITE_PUBLIC_ variables),
+ * falling back to the backend proxy route (/api/funds) if needed.
  */
 export async function fetchBackendFunds(): Promise<{
   source: string;
@@ -25,6 +26,26 @@ export async function fetchBackendFunds(): Promise<{
   message?: string;
   detectedEnvVar?: string;
 }> {
+  // Strategy 1: Direct Supabase client query from browser
+  if (isClientSupabaseConfigured()) {
+    try {
+      const direct = await fetchFundsDirectFromSupabase();
+      if (direct.success && direct.funds.length > 0) {
+        return {
+          source: 'supabase',
+          funds: direct.funds,
+          message: 'Loaded successfully from Supabase',
+        };
+      }
+      if (direct.error) {
+        console.warn('Direct Supabase query failed, attempting /api/funds fallback:', direct.error);
+      }
+    } catch (directErr) {
+      console.warn('Direct Supabase fetch error, attempting fallback:', directErr);
+    }
+  }
+
+  // Strategy 2: Serverless/Express proxy route (/api/funds)
   try {
     const res = await fetch('/api/funds');
     if (!res.ok) {
@@ -40,11 +61,19 @@ export async function fetchBackendFunds(): Promise<{
       return {
         source: 'error',
         funds: [],
-        message: `API request failed: ${errorDetail}. Ensure DATABASE_URL or POSTGRES_URL is set in Vercel Environment Variables.`,
+        message: `API request failed: ${errorDetail}. Ensure VITE_PUBLIC_SUPABASE_URL and VITE_PUBLIC_SUPABASE_ANON_KEY are set.`,
       };
     }
 
     const data = await res.json();
+    if (data.source === 'unconfigured') {
+      return {
+        source: 'unconfigured',
+        funds: [],
+        message: data.message,
+      };
+    }
+
     const mappedFunds: Fund[] = (data.funds || []).map((f: any, idx: number) => {
       const palette = FUND_PALETTES[idx % FUND_PALETTES.length];
       return {
@@ -69,7 +98,7 @@ export async function fetchBackendFunds(): Promise<{
     });
 
     return {
-      source: data.source,
+      source: data.source || 'supabase',
       funds: mappedFunds,
       message: data.message,
       detectedEnvVar: data.detectedEnvVar,
@@ -79,25 +108,24 @@ export async function fetchBackendFunds(): Promise<{
     return {
       source: 'error',
       funds: [],
-      message: err?.message || 'Failed to connect to backend service',
+      message: err?.message || 'Failed to connect to backend database',
     };
   }
 }
 
 /**
- * Check Neon connection and environment variable status for diagnostics.
+ * Check Supabase connection and environment variable status for diagnostics.
  */
-export async function checkNeonStatus(): Promise<{
+export async function checkSupabaseStatus(): Promise<{
   configured: boolean;
   connected: boolean;
-  detectedEnvVar?: string;
-  database?: string;
+  url?: string;
   fundCount?: number;
   message?: string;
   error?: string;
 }> {
   try {
-    const res = await fetch('/api/neon/status');
+    const res = await fetch('/api/supabase/status');
     if (!res.ok) {
       return {
         configured: false,
@@ -110,8 +138,9 @@ export async function checkNeonStatus(): Promise<{
     return {
       configured: false,
       connected: false,
-      message: err?.message || 'Network error checking database status',
+      message: err?.message || 'Network error checking Supabase status',
     };
   }
 }
+
 

@@ -2,9 +2,7 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { app } from './server/app.js';
-
-import { isNeonConfigured } from './server/db.js';
-import { ensureNeonSchema } from './server/routes.js';
+import { isSupabaseConfigured } from './server/supabase.js';
 
 async function startServer() {
   const PORT = 3000;
@@ -26,9 +24,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
-    if (isNeonConfigured()) {
-      ensureNeonSchema().catch((e) => console.error('Init Neon schema error:', e));
-    }
+    console.log(`Supabase status: ${isSupabaseConfigured() ? 'Configured' : 'Not configured'}`);
   });
 }
 

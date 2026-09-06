@@ -130,7 +130,7 @@ export const FundCombobox: React.FC<FundComboboxProps> = ({
           id={`fund-dropdown-menu-${rowLabel.toLowerCase().replace(/\s+/g, '-')}`}
           className={`absolute ${
             dropdownAlign === 'right' ? 'right-0' : 'left-0'
-          } top-full mt-1.5 z-50 bg-white rounded-xl shadow-2xl border border-neutral-200/90 p-2.5 w-[310px] sm:w-[330px] max-h-96 flex flex-col`}
+          } top-full mt-1.5 z-50 bg-white rounded-xl shadow-2xl border border-neutral-200/90 p-2.5 w-[min(300px,82vw)] sm:w-[330px] max-h-96 flex flex-col`}
         >
           {/* Search Bar inside Dropdown */}
           <div className="relative mb-2 shrink-0">
