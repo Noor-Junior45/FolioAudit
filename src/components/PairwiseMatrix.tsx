@@ -33,6 +33,7 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
   // - Fund 2 vs Fund 1, Fund 2 vs Fund 3, Fund 2 vs Fund 4
   // - Fund 3 vs Fund 1, Fund 3 vs Fund 2, Fund 3 vs Fund 4
   // - Fund 4 vs Fund 1, Fund 4 vs Fund 2, Fund 4 vs Fund 3
+  // Only include cards with > 0 common holdings
   const pairGroups: {
     baseFundIndex: number;
     pairs: {
@@ -42,6 +43,7 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
       indexB: number;
       fundA: Fund;
       fundB: Fund;
+      overlap: ReturnType<typeof calculatePairwiseOverlap>;
     }[];
   }[] = [];
 
@@ -56,6 +58,7 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
       indexB: number;
       fundA: Fund;
       fundB: Fund;
+      overlap: ReturnType<typeof calculatePairwiseOverlap>;
     }[] = [];
 
     for (let j = 0; j < funds.length; j++) {
@@ -63,13 +66,21 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
       const fundB = funds[j];
       if (!fundB) continue;
 
+      const overlap = calculatePairwiseOverlap(fundA, fundB);
+
+      // Do not show card if there are zero common holdings
+      if (overlap.commonStockCount === 0 || overlap.commonHoldings.length === 0) {
+        continue;
+      }
+
       groupPairs.push({
         key: `pair-${i}-${j}`,
         label: `Fund ${i + 1} vs Fund ${j + 1}`,
         indexA: i,
         indexB: j,
         fundA,
-        fundB
+        fundB,
+        overlap
       });
     }
 
@@ -100,6 +111,7 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
   const hasPairs = pairGroups.some((g) => g.pairs.length > 0);
 
   if (!hasPairs) {
+    const selectedCount = funds.filter(Boolean).length;
     return (
       <div id="pairwise-overlap-matrix" className="w-full p-8 rounded-2xl bg-neutral-50/70 border border-dashed border-neutral-300 text-center space-y-2">
         <div className="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center mx-auto text-neutral-500 shadow-2xs">
@@ -109,7 +121,9 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
           Pairwise Overlap Matrix
         </div>
         <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
-          Select at least two funds in the comparison table above to calculate pairwise stock overlaps and common portfolio weights.
+          {selectedCount < 2
+            ? 'Select at least two funds in the comparison table above to calculate pairwise stock overlaps and common portfolio weights.'
+            : 'No overlapping stocks found among the selected funds (0 common holdings).'}
         </p>
       </div>
     );
@@ -156,8 +170,7 @@ export const PairwiseMatrix: React.FC<PairwiseMatrixProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 items-start">
-              {group.pairs.map(({ key, label, indexA, indexB, fundA, fundB }) => {
-                const overlap = calculatePairwiseOverlap(fundA, fundB);
+              {group.pairs.map(({ key, label, indexA, indexB, fundA, fundB, overlap }) => {
                 const isExpanded = !!expandedPairKeys[key];
                 const percentage = overlap.overlapPercentage;
 

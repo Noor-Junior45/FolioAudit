@@ -7,8 +7,52 @@ export interface UniqueStock {
 }
 
 /**
+ * Normalizes sector names to group related industries cleanly (e.g. Banking & Financial Services)
+ */
+function normalizeSectorGroup(sector?: string): string {
+  if (!sector) return 'Other';
+  const clean = sector.trim();
+  const lower = clean.toLowerCase();
+
+  if (
+    lower.includes('financ') ||
+    lower.includes('bank') ||
+    lower.includes('nbfc') ||
+    lower.includes('insurance')
+  ) {
+    return 'Financial Services';
+  }
+  if (lower.startsWith('auto')) {
+    return 'Automobile';
+  }
+  if (lower.includes('tech') || lower === 'it' || lower.includes('information tech')) {
+    return 'Technology';
+  }
+  if (lower.includes('pharma') || lower.includes('health')) {
+    return 'Healthcare';
+  }
+  if (lower.includes('fmcg') || lower.includes('consumer good')) {
+    return 'Consumer Goods';
+  }
+  if (lower.includes('energy') || lower.includes('oil') || lower.includes('gas') || lower.includes('petroleum')) {
+    return 'Energy';
+  }
+  if (lower.includes('metal') || lower.includes('mining')) {
+    return 'Metals & Mining';
+  }
+  if (lower.includes('telecom')) {
+    return 'Telecommunication';
+  }
+  if (lower.includes('infra') || lower.includes('construction')) {
+    return 'Construction & Infrastructure';
+  }
+  return clean;
+}
+
+/**
  * Calculates the union of all unique stocks from the provided funds,
- * sorted alphabetically (A to Z) by stock name.
+ * sorted with Finance sector stocks first, followed by other sectors alphabetically,
+ * and with stocks sorted A to Z within each sector.
  */
 export function getUnionStocks(funds: (Fund | null)[]): UniqueStock[] {
   const stockMap = new Map<string, UniqueStock>();
@@ -20,15 +64,44 @@ export function getUnionStocks(funds: (Fund | null)[]): UniqueStock[] {
         stockMap.set(h.isin, {
           isin: h.isin,
           name: h.name,
-          sector: h.sector
+          sector: h.sector || 'Other'
         });
       }
     });
   });
 
-  return Array.from(stockMap.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-  );
+  return Array.from(stockMap.values()).sort((a, b) => {
+    const groupA = normalizeSectorGroup(a.sector);
+    const groupB = normalizeSectorGroup(b.sector);
+
+    const isFinanceA = groupA === 'Financial Services';
+    const isFinanceB = groupB === 'Financial Services';
+
+    // 1. Finance sector stocks always display first
+    if (isFinanceA && !isFinanceB) return -1;
+    if (!isFinanceA && isFinanceB) return 1;
+
+    // If both are in Finance, sort A to Z alphabetically by stock name
+    if (isFinanceA && isFinanceB) {
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    }
+
+    const isOtherA = !a.sector || groupA.toLowerCase() === 'other' || groupA.toLowerCase() === 'others';
+    const isOtherB = !b.sector || groupB.toLowerCase() === 'other' || groupB.toLowerCase() === 'others';
+
+    // 2. Uncategorized / 'Other' sectors go to the bottom
+    if (isOtherA && !isOtherB) return 1;
+    if (!isOtherA && isOtherB) return -1;
+
+    // 3. Other sectors are sorted alphabetically (e.g. Automobile, Chemicals, Energy, Healthcare, Technology)
+    const sectorCompare = groupA.localeCompare(groupB, undefined, { sensitivity: 'base' });
+    if (sectorCompare !== 0) {
+      return sectorCompare;
+    }
+
+    // 4. Within each sector, stocks are sorted A to Z alphabetically
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
 }
 
 /**
